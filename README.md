@@ -56,7 +56,7 @@ krun scripts/checkpatch.pl --file drivers/example.c  # Run checkpatch
 
 The Docker environment includes:
 - **Build tools**: gcc, make, binutils
-- **Kernel-specific tools**: bc, bison, flex, pahole (dwarves)
+- **Kernel-specific tools**: bc, bison, flex
 - **Libraries**: libelf-dev, libssl-dev, libncurses-dev
 - **Utilities**: git, rsync, cpio, python3
 - **Cross-compilation support**: Ready for different architectures
@@ -256,7 +256,6 @@ The Docker environment sets:
 
 ## Integration with Other Tools
 
-- **pahole**: Already configured to work with the kernel source
 - **git**: Full git functionality available in the container
 - **Text editors**: vim is installed, or use external editors on the host
 
