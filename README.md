@@ -242,7 +242,7 @@ docker rmi kernel-build-env
 ```
     Dockerfile.kernel-build    # Docker environment definition
     build-kernel-env.sh        # Build script for Docker image
-    func_del.shell             # Command for kernel build
+    func_def.shell             # Command for kernel build
     README.md                  # README file
 
 ```
