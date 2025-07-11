@@ -1,0 +1,159 @@
+
+# ====== Linux Kernel Build Environment ======
+
+# Function to run make commands in a Docker container for kernel compilation
+kmake() {
+  # Check if kernel-build-env image exists
+  if ! docker images | grep -q "kernel-build-env"; then
+    echo "${bright_red}Error:${reset} kernel-build-env Docker image not found!"
+    echo "Please run: ./build-kernel-env.sh to build the environment first."
+    return 1
+  fi
+  
+  # Parse arguments to detect architecture and set cross-compilation variables
+  local arch=""
+  local cross_compile=""
+  local make_args=()
+  local env_vars=""
+  
+  # Parse command line arguments
+  for arg in "$@"; do
+    case "$arg" in
+      ARCH=*)
+        arch="${arg#ARCH=}"
+        ;;
+      CROSS_COMPILE=*)
+        cross_compile="${arg#CROSS_COMPILE=}"
+        ;;
+      *)
+        make_args+=("$arg")
+        ;;
+    esac
+  done
+  
+  # Set cross-compilation toolchain based on architecture
+  if [[ -n "$arch" ]]; then
+    case "$arch" in
+      x86_64|x86|i386)
+        if [[ -z "$cross_compile" ]]; then
+          cross_compile="x86_64-linux-gnu-"
+        fi
+        echo "${bright_blue}Cross-compiling for x86_64 architecture${reset}"
+        ;;
+      arm64|aarch64)
+        if [[ -z "$cross_compile" ]]; then
+          cross_compile="aarch64-linux-gnu-"
+        fi
+        echo "${bright_blue}Cross-compiling for ARM64 architecture${reset}"
+        ;;
+      arm)
+        if [[ -z "$cross_compile" ]]; then
+          cross_compile="arm-linux-gnueabihf-"
+        fi
+        echo "${bright_blue}Cross-compiling for ARM architecture${reset}"
+        ;;
+      riscv)
+        if [[ -z "$cross_compile" ]]; then
+          cross_compile="riscv64-linux-gnu-"
+        fi
+        echo "${bright_blue}Cross-compiling for RISC-V 64-bit architecture${reset}"
+        ;;
+      *)
+        echo "${bright_yellow}Warning:${reset} Unknown architecture '$arch', using native compilation"
+        ;;
+    esac
+    
+    # Set environment variables for cross-compilation
+    env_vars="ARCH=$arch"
+    if [[ -n "$cross_compile" ]]; then
+      env_vars="$env_vars CROSS_COMPILE=$cross_compile"
+    fi
+  else
+    # Default to native ARM64 compilation if no ARCH specified
+    echo "${bright_green}Using native ARM64 compilation${reset}"
+    env_vars="ARCH=arm64"
+  fi
+  
+  # Run make command in Docker container with cross-compilation environment
+  echo "${bright_cyan}Running:${reset} $env_vars make ${make_args[*]}"
+  
+  # Set up environment variables for docker run
+  local docker_env_args=()
+  if [[ -n "$arch" ]]; then
+    docker_env_args+=(-e "ARCH=$arch")
+  fi
+  if [[ -n "$cross_compile" ]]; then
+    docker_env_args+=(-e "CROSS_COMPILE=$cross_compile")
+  fi
+  
+  docker run --rm -it \
+    -v "$(pwd):/kernel" \
+    -w /kernel \
+    "${docker_env_args[@]}" \
+    kernel-build-env \
+    make "${make_args[@]}"
+}
+
+# Function to run shell commands in kernel build environment
+kshell() {
+  # Check if kernel-build-env image exists
+  if ! docker images | grep -q "kernel-build-env"; then
+    echo "${bright_red}Error:${reset} kernel-build-env Docker image not found!"
+    echo "Please run: ./build-kernel-env.sh to build the environment first."
+    return 1
+  fi
+  
+  # Run shell in Docker container
+  docker run --rm -it \
+    -v "$(pwd):/kernel" \
+    -w /kernel \
+    kernel-build-env \
+    /bin/bash "$@"
+}
+
+# Function to run any command in kernel build environment
+krun() {
+  # Check if kernel-build-env image exists
+  if ! docker images | grep -q "kernel-build-env"; then
+    echo "${bright_red}Error:${reset} kernel-build-env Docker image not found!"
+    echo "Please run: ./build-kernel-env.sh to build the environment first."
+    return 1
+  fi
+  
+  # Run command in Docker container
+  docker run --rm -it \
+    -v "$(pwd):/kernel" \
+    -w /kernel \
+    kernel-build-env \
+    "$@"
+}
+
+# Cross-compilation convenience functions
+kmake-x86() {
+  echo "${bright_blue}Building for x86_64 architecture${reset}"
+  kmake ARCH=x86_64 "$@"
+}
+
+kmake-arm64() {
+  echo "${bright_blue}Building for ARM64 architecture${reset}"
+  kmake ARCH=arm64 "$@"
+}
+
+kmake-arm() {
+  echo "${bright_blue}Building for ARM architecture${reset}"
+  kmake ARCH=arm "$@"
+}
+
+kmake-riscv() {
+  echo "${bright_blue}Building for RISC-V 64-bit architecture${reset}"
+  kmake ARCH=riscv "$@"
+}
+
+# Function to show available cross-compilation toolchains
+kshow-toolchains() {
+  echo "${bright_green}Available cross-compilation toolchains:${reset}"
+  krun bash -c 'echo "x86_64: $(x86_64-linux-gnu-gcc --version 2>/dev/null | head -1 || echo "Not available")"'
+  krun bash -c 'echo "ARM64:  $(aarch64-linux-gnu-gcc --version 2>/dev/null | head -1 || echo "Not available")"'
+  krun bash -c 'echo "ARM:    $(arm-linux-gnueabihf-gcc --version 2>/dev/null | head -1 || echo "Not available")"'
+  krun bash -c 'echo "RISC-V: $(riscv64-linux-gnu-gcc --version 2>/dev/null | head -1 || echo "Not available")"'
+}

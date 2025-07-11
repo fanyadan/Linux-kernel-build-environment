@@ -1,0 +1,89 @@
+FROM ubuntu:22.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install essential packages for kernel compilation
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    bc \
+    bison \
+    flex \
+    libelf-dev \
+    libncurses-dev \
+    libssl-dev \
+    rsync \
+    kmod \
+    cpio \
+    initramfs-tools \
+    git \
+    wget \
+    curl \
+    vim \
+    python3 \
+    python3-pip \
+    dwarves \
+    pkg-config \
+    zlib1g-dev \
+    make \
+    gcc-12 \
+    g++-12 \
+    libc6-dev \
+    binutils \
+    tar \
+    gzip \
+    bzip2 \
+    xz-utils \
+    unzip \
+    patch \
+    software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install cross-compilation toolchains
+RUN apt-get update && apt-get install -y \
+    gcc-x86-64-linux-gnu \
+    g++-x86-64-linux-gnu \
+    libc6-dev-amd64-cross \
+    gcc-aarch64-linux-gnu \
+    g++-aarch64-linux-gnu \
+    libc6-dev-arm64-cross \
+    gcc-arm-linux-gnueabihf \
+    g++-arm-linux-gnueabihf \
+    libc6-dev-armhf-cross \
+    gcc-riscv64-linux-gnu \
+    g++-riscv64-linux-gnu \
+    libc6-dev-riscv64-cross \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set gcc-12 as the default compiler
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
+
+# Set working directory
+WORKDIR /kernel
+
+# Set default shell
+SHELL ["/bin/bash", "-c"]
+
+# Create a non-root user with same UID/GID as host user (to be overridden)
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+ARG USERNAME=builder
+
+RUN EXISTING_GROUP=$(getent group ${GROUP_ID} | cut -d: -f1) && \
+    if [ -n "$EXISTING_GROUP" ]; then \
+        useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash ${USERNAME}; \
+    else \
+        groupadd -g ${GROUP_ID} ${USERNAME} && \
+        useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash ${USERNAME}; \
+    fi && \
+    usermod -aG sudo ${USERNAME}
+
+# Switch to non-root user
+USER ${USERNAME}
+
+# Set environment variables for cross-compilation
+ENV ARCH=x86_64
+ENV CROSS_COMPILE=""
+
+CMD ["/bin/bash"]
