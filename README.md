@@ -1,9 +1,5 @@
 # Linux Kernel Build Environment for MacOS
 
-This project is licensed under the terms of the GNU General Public License v3.0 (GPL-3.0). See the `LICENSE` file for details.
-
-# Linux Kernel Build Environment for MacOS
-
 This setup provides a Docker-based Linux environment for compiling the Linux kernel on macOS, with full **cross-compilation support** for multiple architectures. Build x86_64, ARM64, ARM, and RISC-V kernels from your ARM64 Mac!
 
 ## Quick Start
