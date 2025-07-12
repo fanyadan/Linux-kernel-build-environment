@@ -237,6 +237,7 @@ kperf() {
   echo ""
   
   # Run the build
+  echo "${bright_yellow}Starting build at $(date)...${reset}"
   kmake "$@"
   local exit_code=$?
   
@@ -246,10 +247,19 @@ kperf() {
   local minutes=$((elapsed / 60))
   local seconds=$((elapsed % 60))
   
+  # Always show timing summary, regardless of exit code
   echo ""
+  echo "=====================================" 
   echo "${bright_green}=== Build Performance Summary ===${reset}"
-  echo "${bright_cyan}Build time: ${minutes}m ${seconds}s${reset}"
-  echo "${bright_cyan}Exit code: $exit_code${reset}"
+  echo "${bright_cyan}Start time: $(date -r $start_time)${reset}"
+  echo "${bright_cyan}End time:   $(date -r $end_time)${reset}"
+  echo "${bright_cyan}Build time: ${minutes}m ${seconds}s (${elapsed} seconds total)${reset}"
+  if [ $exit_code -eq 0 ]; then
+    echo "${bright_green}Status: BUILD SUCCESSFUL${reset}"
+  else
+    echo "${bright_red}Status: BUILD FAILED (exit code: $exit_code)${reset}"
+  fi
+  echo "=====================================" 
   echo ""
   echo "${bright_cyan}CCCache stats after build:${reset}"
   kccache-stats
