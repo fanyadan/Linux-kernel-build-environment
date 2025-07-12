@@ -229,7 +229,30 @@ kccache-zero() {
 # Performance monitoring
 kperf() {
   echo "${bright_green}Building with performance monitoring...${reset}"
-  time kmake "$@"
-  echo "${bright_cyan}Build completed. CCCache stats:${reset}"
+  local start_time=$(date +%s)
+  
+  # Show ccache stats before build
+  echo "${bright_cyan}CCCache stats before build:${reset}"
   kccache-stats
+  echo ""
+  
+  # Run the build
+  kmake "$@"
+  local exit_code=$?
+  
+  # Calculate elapsed time
+  local end_time=$(date +%s)
+  local elapsed=$((end_time - start_time))
+  local minutes=$((elapsed / 60))
+  local seconds=$((elapsed % 60))
+  
+  echo ""
+  echo "${bright_green}=== Build Performance Summary ===${reset}"
+  echo "${bright_cyan}Build time: ${minutes}m ${seconds}s${reset}"
+  echo "${bright_cyan}Exit code: $exit_code${reset}"
+  echo ""
+  echo "${bright_cyan}CCCache stats after build:${reset}"
+  kccache-stats
+  
+  return $exit_code
 }
