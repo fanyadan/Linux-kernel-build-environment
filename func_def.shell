@@ -114,8 +114,8 @@ kmake() {
   
   docker run --rm -it \
     --cpus="$max_jobs" \
-    --memory="32g" \
-    --memory-swap="48g" \
+    --memory="56g" \
+    --memory-swap="64g" \
     -v "$(pwd):/kernel" \
     -v "$(pwd)/.ccache:/kernel/.ccache" \
     -w /kernel \
