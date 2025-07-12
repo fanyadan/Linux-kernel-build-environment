@@ -11,6 +11,7 @@ This setup provides a Docker-based Linux environment for compiling the Linux ker
 2. **Add commnd definition in shell rc file (.bashrc in example)**
    ```bash
    cat func_def.shell >> ~/.bashrc
+   source ~/.bashrc
    ```
 3. **Start compiling the kernel:**
    ```bash
