@@ -10,11 +10,24 @@ kmake() {
     return 1
   fi
   
+  # Get optimal number of parallel jobs (CPU cores)
+  local max_jobs
+  if command -v nproc >/dev/null 2>&1; then
+    max_jobs=$(nproc)
+  elif command -v sysctl >/dev/null 2>&1; then
+    max_jobs=$(sysctl -n hw.ncpu 2>/dev/null || echo "4")
+  else
+    max_jobs=4
+  fi
+  
   # Parse arguments to detect architecture and set cross-compilation variables
   local arch=""
   local cross_compile=""
   local make_args=()
   local env_vars=""
+  
+  # Check if -j is already specified in arguments
+  local has_parallel_flag=false
   
   # Parse command line arguments
   for arg in "$@"; do
@@ -25,11 +38,21 @@ kmake() {
       CROSS_COMPILE=*)
         cross_compile="${arg#CROSS_COMPILE=}"
         ;;
+      -j*)
+        has_parallel_flag=true
+        make_args+=("$arg")
+        ;;
       *)
         make_args+=("$arg")
         ;;
     esac
   done
+  
+  # Add parallel jobs if not specified
+  if [ "$has_parallel_flag" = false ]; then
+    make_args+=("-j$max_jobs")
+    echo "${bright_cyan}Auto-adding parallel jobs: -j$max_jobs${reset}"
+  fi
   
   # Set cross-compilation toolchain based on architecture
   if [[ -n "$arch" ]]; then
@@ -86,10 +109,18 @@ kmake() {
     docker_env_args+=(-e "CROSS_COMPILE=$cross_compile")
   fi
   
+  # Create ccache directory if it doesn't exist
+  mkdir -p "$(pwd)/.ccache"
+  
   docker run --rm -it \
+    --cpus="$max_jobs" \
+    --memory="32g" \
+    --memory-swap="48g" \
     -v "$(pwd):/kernel" \
+    -v "$(pwd)/.ccache:/kernel/.ccache" \
     -w /kernel \
     "${docker_env_args[@]}" \
+    -e "MAKEFLAGS=-j$max_jobs" \
     kernel-build-env \
     make "${make_args[@]}"
 }
@@ -156,4 +187,49 @@ kshow-toolchains() {
   krun bash -c 'echo "ARM64:  $(aarch64-linux-gnu-gcc --version 2>/dev/null | head -1 || echo "Not available")"'
   krun bash -c 'echo "ARM:    $(arm-linux-gnueabihf-gcc --version 2>/dev/null | head -1 || echo "Not available")"'
   krun bash -c 'echo "RISC-V: $(riscv64-linux-gnu-gcc --version 2>/dev/null | head -1 || echo "Not available")"'
+}
+
+# Fast build functions with common optimizations
+kfast() {
+  echo "${bright_green}Fast kernel build with optimizations${reset}"
+  kmake defconfig
+  kmake
+}
+
+kfast-x86() {
+  echo "${bright_green}Fast x86_64 kernel build${reset}"
+  kmake-x86 defconfig
+  kmake-x86
+}
+
+kfast-arm64() {
+  echo "${bright_green}Fast ARM64 kernel build${reset}"
+  kmake-arm64 defconfig
+  kmake-arm64
+}
+
+# CCCache management functions
+kccache-stats() {
+  echo "${bright_green}CCCache statistics:${reset}"
+  krun ccache -s
+}
+
+kccache-clear() {
+  echo "${bright_yellow}Clearing ccache...${reset}"
+  krun ccache -C
+  echo "${bright_green}CCCache cleared.${reset}"
+}
+
+kccache-zero() {
+  echo "${bright_yellow}Zeroing ccache statistics...${reset}"
+  krun ccache -z
+  echo "${bright_green}CCCache statistics zeroed.${reset}"
+}
+
+# Performance monitoring
+kperf() {
+  echo "${bright_green}Building with performance monitoring...${reset}"
+  time kmake "$@"
+  echo "${bright_cyan}Build completed. CCCache stats:${reset}"
+  kccache-stats
 }

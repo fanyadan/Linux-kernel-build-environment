@@ -30,14 +30,30 @@ This setup provides a Docker-based Linux environment for compiling the Linux ker
 
 ## Available Commands
 
-### `kmake` - Run make commands in Docker
+### `kmake` - Run make commands in Docker (Optimized)
 ```bash
 kmake menuconfig           # Configure kernel
 kmake defconfig           # Use default configuration
-kmake -j8                 # Build with 8 parallel jobs
+kmake                      # Build with auto-detected parallel jobs (all CPU cores)
+kmake -j8                 # Override with specific number of parallel jobs
 kmake modules             # Build kernel modules
 kmake clean               # Clean build artifacts
 kmake mrproper            # Clean everything including config
+```
+
+### Fast Build Commands
+```bash
+kfast                      # Quick native ARM64 build (defconfig + compile)
+kfast-x86                  # Quick x86_64 build
+kfast-arm64                # Quick ARM64 build
+kperf defconfig            # Build with performance monitoring and timing
+```
+
+### CCCache Management
+```bash
+kccache-stats              # Show compilation cache statistics
+kccache-clear              # Clear compilation cache
+kccache-zero               # Reset cache statistics
 ```
 
 ### `kshell` - Interactive shell in build environment
@@ -57,9 +73,10 @@ krun scripts/checkpatch.pl --file drivers/example.c  # Run checkpatch
 
 The Docker environment includes:
 - **Build tools**: gcc, make, binutils
-- **Kernel-specific tools**: bc, bison, flex
+- **Kernel-specific tools**: bc, bison, flex, pahole (dwarves)
 - **Libraries**: libelf-dev, libssl-dev, libncurses-dev
 - **Utilities**: git, rsync, cpio, python3
+- **Performance tools**: ccache (compiler cache), ninja-build
 - **Cross-compilation support**: Ready for different architectures
 
 ## Cross-Compilation Support
@@ -231,12 +248,28 @@ docker rmi kernel-build-env
 ./build-kernel-env.sh
 ```
 
-## Performance Tips
+## Performance Optimizations
 
-1. **Use parallel builds**: `kmake -j$(nproc)` or `kmake -j8`
-2. **Incremental builds**: After initial build, subsequent builds are much faster
-3. **Docker resource allocation**: Ensure Docker has sufficient CPU/memory allocated
+This build environment is automatically optimized for maximum compilation speed:
+
+### Automatic Optimizations
+- **Auto-parallel builds**: Automatically uses all available CPU cores (detected: your system has 10 cores)
+- **CCCache**: Compiler cache for faster recompilation (4GB cache, compressed) - **pre-installed and configured**
+- **Memory optimization**: Docker container uses up to 32GB RAM with 48GB swap
+- **Cross-compiler caching**: All cross-compilation toolchains use ccache automatically
+
+### Performance Features
+- **Fast build commands**: `kfast`, `kfast-x86`, `kfast-arm64` for quick builds
+- **Performance monitoring**: `kperf` command shows build time and cache statistics
+- **Cache management**: `kccache-stats`, `kccache-clear`, `kccache-zero` commands
+
+### Manual Performance Tips
+
+1. **Parallel builds**: The system automatically uses `-j10` (all CPU cores)
+2. **Incremental builds**: CCCache makes subsequent builds extremely fast
+3. **Docker resource allocation**: Pre-configured for optimal resource usage
 4. **Clean selectively**: Use `kmake clean` instead of `kmake mrproper` when possible
+5. **Monitor cache**: Use `kccache-stats` to see compilation cache hit rate
 
 ## File Structure
 

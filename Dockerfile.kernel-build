@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install essential packages for kernel compilation
+# Install essential packages for kernel compilation with optimizations
 RUN apt-get update && apt-get install -y \
     build-essential \
     bc \
@@ -37,6 +37,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     patch \
     software-properties-common \
+    ccache \
+    ninja-build \
     && rm -rf /var/lib/apt/lists/*
 
 # Install cross-compilation toolchains
@@ -79,11 +81,30 @@ RUN EXISTING_GROUP=$(getent group ${GROUP_ID} | cut -d: -f1) && \
     fi && \
     usermod -aG sudo ${USERNAME}
 
+# Configure ccache for faster compilation
+RUN mkdir -p /opt/ccache/bin && \
+    ln -s /usr/bin/ccache /opt/ccache/bin/gcc && \
+    ln -s /usr/bin/ccache /opt/ccache/bin/g++ && \
+    ln -s /usr/bin/ccache /opt/ccache/bin/cc && \
+    ln -s /usr/bin/ccache /opt/ccache/bin/c++ && \
+    ln -s /usr/bin/ccache /opt/ccache/bin/x86_64-linux-gnu-gcc && \
+    ln -s /usr/bin/ccache /opt/ccache/bin/aarch64-linux-gnu-gcc && \
+    ln -s /usr/bin/ccache /opt/ccache/bin/arm-linux-gnueabihf-gcc && \
+    ln -s /usr/bin/ccache /opt/ccache/bin/riscv64-linux-gnu-gcc
+
 # Switch to non-root user
 USER ${USERNAME}
 
-# Set environment variables for cross-compilation
+# Set up ccache directory
+RUN mkdir -p ~/.ccache
+
+# Set environment variables for cross-compilation and optimization
 ENV ARCH=x86_64
 ENV CROSS_COMPILE=""
+ENV PATH="/opt/ccache/bin:$PATH"
+ENV CCACHE_DIR="/kernel/.ccache"
+ENV CCACHE_MAXSIZE="4G"
+ENV CCACHE_COMPRESS="1"
+ENV CCACHE_COMPRESSLEVEL="6"
 
 CMD ["/bin/bash"]
