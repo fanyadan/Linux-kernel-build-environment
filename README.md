@@ -1,6 +1,25 @@
-# Linux Kernel Build Environment for MacOS
+# Linux Kernel Build Environment
 
-This setup provides a Docker-based Linux environment for compiling the Linux kernel on macOS, with full **cross-compilation support** for multiple architectures. Build x86_64, ARM64, ARM, and RISC-V kernels from your ARM64 Mac!
+This setup provides a Docker-based Linux environment for compiling the Linux kernel on **any platform with Docker support** (macOS, Linux, Windows with WSL2), with full **cross-compilation support** for multiple architectures. Build x86_64, ARM64, ARM, and RISC-V kernels from any host system!
+
+## Platform Compatibility
+
+This build environment works on any system with Docker support:
+
+### ✅ Supported Platforms
+- **macOS** (Intel and Apple Silicon)
+- **Linux** (any distribution with Docker)
+- **Windows** (with WSL2 and Docker Desktop)
+- **Cloud environments** (AWS, Google Cloud, Azure, etc.)
+
+### Prerequisites
+- Docker installed and running
+- Bash-compatible shell (bash, zsh, etc.)
+- Git (for cloning kernel source)
+
+### Shell Compatibility
+- **macOS/Linux**: Works with bash, zsh, fish (with minor adaptations)
+- **Windows**: Use WSL2 with bash or zsh
 
 ## Quick Start
 
