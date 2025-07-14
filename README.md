@@ -68,7 +68,7 @@ kfast-arm64                # Quick ARM64 build
 kperf defconfig            # Build with performance monitoring and timing
 ```
 
-### CCCache Management
+### CCache Management
 ```bash
 kccache-stats              # Show compilation cache statistics
 kccache-clear              # Clear compilation cache
@@ -281,7 +281,7 @@ physical memory:
 - ⚡ **Full kernel build**: Completed in minutes, not hours
 - 🚀 **10 parallel jobs**: Utilizing all CPU cores automatically
 - 💾 **56GB RAM**: Aggressive memory allocation for maximum speed
-- 📦 **CCCache optimization**: Subsequent builds are extremely fast
+- 📦 **CCache optimization**: Subsequent builds are extremely fast
 - 🔄 **Cross-compilation**: Fast builds for multiple architectures
 
 The screenshot above shows a real kernel compilation session using `kperf` performance monitoring, demonstrating the optimized build times achieved with this Docker-based environment.
@@ -292,7 +292,7 @@ This build environment is automatically optimized for maximum compilation speed:
 
 ### Automatic Optimizations
 - **Auto-parallel builds**: Automatically uses all available CPU cores (detected: my system has 10 cores)
-- **CCCache**: Compiler cache for faster recompilation (4GB cache, compressed) - **pre-installed and configured**
+- **CCache**: Compiler cache for faster recompilation (4GB cache, compressed) - **pre-installed and configured**
 - **Memory optimization**: Docker container uses up to 56GB RAM with 64GB total memory (aggressive configuration)
 - **Cross-compiler caching**: All cross-compilation toolchains use ccache automatically
 
@@ -304,7 +304,7 @@ This build environment is automatically optimized for maximum compilation speed:
 ### Manual Performance Tips
 
 1. **Parallel builds**: The system automatically uses `-j10` (all CPU cores)
-2. **Incremental builds**: CCCache makes subsequent builds extremely fast
+2. **Incremental builds**: CCache makes subsequent builds extremely fast
 3. **Docker resource allocation**: Pre-configured for optimal resource usage
 4. **Clean selectively**: Use `kmake clean` instead of `kmake mrproper` when possible
 5. **Monitor cache**: Use `kccache-stats` to see compilation cache hit rate

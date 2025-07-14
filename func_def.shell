@@ -208,22 +208,22 @@ kfast-arm64() {
   kmake-arm64
 }
 
-# CCCache management functions
+# CCache management functions
 kccache-stats() {
-  echo "${bright_green}CCCache statistics:${reset}"
+  echo "${bright_green}CCache statistics:${reset}"
   krun ccache -s
 }
 
 kccache-clear() {
   echo "${bright_yellow}Clearing ccache...${reset}"
   krun ccache -C
-  echo "${bright_green}CCCache cleared.${reset}"
+  echo "${bright_green}CCache cleared.${reset}"
 }
 
 kccache-zero() {
   echo "${bright_yellow}Zeroing ccache statistics...${reset}"
   krun ccache -z
-  echo "${bright_green}CCCache statistics zeroed.${reset}"
+  echo "${bright_green}CCache statistics zeroed.${reset}"
 }
 
 # Performance monitoring
@@ -232,7 +232,7 @@ kperf() {
   local start_time=$(date +%s)
   
   # Show ccache stats before build
-  echo "${bright_cyan}CCCache stats before build:${reset}"
+  echo "${bright_cyan}CCache stats before build:${reset}"
   kccache-stats
   echo ""
   
@@ -261,7 +261,7 @@ kperf() {
   fi
   echo "=====================================" 
   echo ""
-  echo "${bright_cyan}CCCache stats after build:${reset}"
+  echo "${bright_cyan}CCache stats after build:${reset}"
   kccache-stats
   
   return $exit_code
