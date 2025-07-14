@@ -275,7 +275,7 @@ Here's how fast this optimized build environment compiles the Linux kernel
 on my MacBook Pro M1 Max with 8 performance cores, 2 efficiency cores and 64GB
 physical memory:
 
-![Build Performance](build.png)
+![Build Performance](https://res.cloudinary.com/dqogtdy4z/image/upload/v1752486079/build_tresvp.png)
 
 **Key Performance Highlights:**
 - ⚡ **Full kernel build**: Completed in minutes, not hours
