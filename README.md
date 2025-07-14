@@ -272,7 +272,7 @@ docker rmi kernel-build-env
 ### Real-World Build Performance
 
 Here's how fast this optimized build environment compiles the Linux kernel
-on MacBook Pro M1 Max with 8 performance cores, 2 efficiency cores and 64GB
+on my MacBook Pro M1 Max with 8 performance cores, 2 efficiency cores and 64GB
 physical memory:
 
 ![Build Performance](build.png)
@@ -291,7 +291,7 @@ The screenshot above shows a real kernel compilation session using `kperf` perfo
 This build environment is automatically optimized for maximum compilation speed:
 
 ### Automatic Optimizations
-- **Auto-parallel builds**: Automatically uses all available CPU cores (detected: your system has 10 cores)
+- **Auto-parallel builds**: Automatically uses all available CPU cores (detected: my system has 10 cores)
 - **CCCache**: Compiler cache for faster recompilation (4GB cache, compressed) - **pre-installed and configured**
 - **Memory optimization**: Docker container uses up to 56GB RAM with 64GB total memory (aggressive configuration)
 - **Cross-compiler caching**: All cross-compilation toolchains use ccache automatically
